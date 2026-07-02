@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirm Application</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #f0f4ff; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 30px 20px; }
+        .confirm-card { background: white; border-radius: 16px; overflow: hidden; max-width: 600px; width: 100%; box-shadow: 0 8px 30px rgba(0,0,0,0.09); }
+        .card-top { background: linear-gradient(135deg, #0f172a 0%, #1e40af 100%); padding: 35px 30px; color: white; }
+        .card-body-area { padding: 30px; }
+        .info-block { background: #f8fafc; border-radius: 10px; padding: 16px 20px; margin-bottom: 16px; border: 1px solid #e2e8f0; }
+        .info-label { font-size: 0.78rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+        .info-value { color: #0f172a; font-weight: 600; }
+        .skill-badge { background: #eff6ff; color: #1e40af; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 500; margin-right: 6px; margin-bottom: 4px; display: inline-block; }
+        .already-applied { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; border-radius: 10px; padding: 16px 20px; margin-bottom: 16px; }
+    </style>
+</head>
+<body>
+<div class="confirm-card">
+    <div class="card-top">
+        <div class="d-flex align-items-center gap-3 mb-2">
+            <div style="background:rgba(255,255,255,0.15); width:50px; height:50px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.4rem; font-weight:bold;"
+                 th:text="${job != null ? #strings.substring(job.company.name,0,1) : 'C'}">C</div>
+            <div>
+                <h4 class="fw-bold mb-0" th:text="${job != null ? job.title : 'Job Title'}">Job Title</h4>
+                <div class="opacity-75" th:text="${job != null ? job.company.name : 'Company'}">Company Name</div>
+            </div>
+        </div>
+        <div class="opacity-75 small">
+            <i class="fa-solid fa-location-dot me-1"></i>
+            <span th:text="${job != null ? job.company.location : 'Location'}">Location</span>
+        </div>
+    </div>
+
+    <div class="card-body-area">
+        <!-- Already Applied Notice -->
+        <div class="already-applied" th:if="${alreadyApplied}">
+            <i class="fa-solid fa-circle-check me-2"></i>
+            <strong>You have already applied for this position.</strong>
+            <div class="text-muted small mt-1">Check <a th:href="@{/student/applications}" class="text-success fw-semibold">My Applications</a> for the status.</div>
+        </div>
+
+        <!-- Job Info Blocks -->
+        <div class="info-block">
+            <div class="info-label">Application Deadline</div>
+            <div class="info-value text-danger"><i class="fa-regular fa-calendar-xmark me-1"></i><span th:text="${job != null ? job.deadline : 'N/A'}">Date</span></div>
+        </div>
+
+        <div class="info-block">
+            <div class="info-label">Minimum GPA Required</div>
+            <div class="info-value"><i class="fa-solid fa-graduation-cap text-primary me-1"></i><span th:text="${job != null ? job.minGpa : '-'}">3.0</span></div>
+        </div>
+
+        <div class="info-block">
+            <div class="info-label">Required Skills</div>
+            <div class="mt-1">
+                <span class="skill-badge" th:each="skill : ${#strings.arraySplit(job.requiredSkills, ',')}" th:text="${#strings.trim(skill)}">Skill</span>
+            </div>
+        </div>
+
+        <div class="info-block">
+            <div class="info-label">What will be submitted</div>
+            <div class="text-muted small mt-1">
+                <i class="fa-solid fa-circle-info text-primary me-1"></i>
+                Your student profile (name, university, GPA, skills) and uploaded CV will be shared with the company.
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="d-flex gap-3 mt-3" th:unless="${alreadyApplied}">
+            <form th:action="@{'/student/apply/' + ${job.id}}" method="post" class="flex-grow-1">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <button type="submit" class="btn btn-success btn-lg w-100 fw-bold">
+                    <i class="fa-solid fa-paper-plane me-2"></i> Confirm & Apply
+                </button>
+            </form>
+            <a th:href="@{/student/dashboard}" class="btn btn-outline-secondary btn-lg px-4 fw-semibold">Cancel</a>
+        </div>
+
+        <div class="d-flex gap-3 mt-3" th:if="${alreadyApplied}">
+            <a th:href="@{/student/applications}" class="btn btn-primary btn-lg flex-grow-1 fw-bold">
+                <i class="fa-solid fa-list me-2"></i> View My Applications
+            </a>
+            <a th:href="@{/student/dashboard}" class="btn btn-outline-secondary btn-lg px-4">Back</a>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

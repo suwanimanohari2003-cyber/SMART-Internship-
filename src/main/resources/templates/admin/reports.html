@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Reports - TalentHub Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; margin: 0; overflow-x: hidden; }
+        .sidebar { width: 250px; background-color: #0f172a; color: #9ca3af; position: fixed; top: 0; bottom: 0; left: 0; display: flex; flex-direction: column; z-index: 1000; }
+        .sidebar-header { padding: 20px; display: flex; align-items: center; gap: 15px; border-bottom: 1px solid #1f2937; }
+        .logo-box { background-color: #ef4444; color: white; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem; }
+        .sidebar-nav { padding: 20px 0; flex-grow: 1; }
+        .nav-item { padding: 12px 20px; display: flex; align-items: center; gap: 15px; cursor: pointer; text-decoration: none; color: #9ca3af; transition: all 0.3s ease; }
+        .nav-item:hover, .nav-item.active { background-color: #1e40af; color: white; border-right: 4px solid #ef4444; }
+        .sidebar-footer { padding: 20px; border-top: 1px solid #1f2937; }
+        .logout-btn { color: #ef4444; display: flex; align-items: center; gap: 10px; cursor: pointer; background: none; border: none; padding: 0; font-size: 1rem; }
+        .main-content { margin-left: 250px; min-height: 100vh; padding-bottom: 50px; }
+        .topbar { background-color: white; height: 70px; padding: 0 30px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e2e8f0; }
+        .page-container { padding: 40px; max-width: 1100px; margin: 0 auto; }
+        .report-card { background: white; border-radius: 14px; border: 1px solid #e2e8f0; overflow: hidden; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .report-card-header { padding: 20px 28px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; gap: 12px; }
+        .report-card-body { padding: 28px; }
+        .export-btn { display: flex; align-items: center; gap: 12px; padding: 18px 22px; border-radius: 12px; text-decoration: none; transition: all 0.2s; border: 2px solid; font-weight: 700; font-size: 0.95rem; }
+        .export-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.12); }
+        .btn-csv { border-color: #16a34a; color: #16a34a; }
+        .btn-csv:hover { background: #16a34a; color: white; }
+        .btn-pdf { border-color: #dc2626; color: #dc2626; }
+        .btn-pdf:hover { background: #dc2626; color: white; }
+        .stat-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-bottom: 28px; }
+        .stat-item { background: #f8fafc; border-radius: 10px; padding: 18px; border: 1px solid #e2e8f0; text-align: center; }
+        .stat-item .num { font-size: 2rem; font-weight: 800; color: #0f172a; }
+        .stat-item .lbl { font-size: 0.78rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; }
+    </style>
+</head>
+<body>
+<div class="sidebar">
+    <div class="sidebar-header">
+        <div class="logo-box">AD</div>
+        <div>
+            <h5 class="m-0 text-white" style="font-size:1.1rem; font-weight:600;">System Admin</h5>
+            <span style="font-size:0.75rem; color:#64748b;">Admin Portal</span>
+        </div>
+    </div>
+    <div class="sidebar-nav">
+        <a th:href="@{/admin/dashboard}" class="nav-item"><i class="fa-solid fa-gauge"></i> Dashboard</a>
+        <a th:href="@{/admin/users}" class="nav-item"><i class="fa-solid fa-users-gear"></i> Manage Users</a>
+        <a th:href="@{/admin/students}" class="nav-item"><i class="fa-solid fa-user-graduate"></i> Manage Students</a>
+        <a th:href="@{/admin/companies}" class="nav-item"><i class="fa-solid fa-building"></i> Manage Companies</a>
+        <a th:href="@{/admin/jobs}" class="nav-item"><i class="fa-solid fa-briefcase"></i> Job Postings</a>
+        <a th:href="@{/admin/reports}" class="nav-item active"><i class="fa-solid fa-chart-pie"></i> System Reports</a>
+        <a th:href="@{/admin/settings}" class="nav-item"><i class="fa-solid fa-gear"></i> Settings</a>
+        <a th:href="@{/admin/api-docs}" class="nav-item"><i class="fa-solid fa-book"></i> API Docs</a>
+    </div>
+    <div class="sidebar-footer">
+        <form th:action="@{/logout}" method="post">
+            <button type="submit" class="logout-btn"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</button>
+        </form>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="topbar">
+        <div class="fw-bold text-dark">System Reports & Export</div>
+        <div style="font-size:0.85rem; color:#64748b;" id="lastGenerated">Generated: <span th:text="${#temporals.format(#temporals.createNow(), 'dd MMM yyyy HH:mm')}">Now</span></div>
+    </div>
+
+    <div class="page-container">
+        <h2 class="fw-bold mb-1">Analytics & Reports</h2>
+        <p class="text-muted mb-4">Download detailed system reports in CSV or PDF format.</p>
+
+        <!-- Live Metrics -->
+        <div class="stat-grid">
+            <div class="stat-item">
+                <div class="num" th:text="${totalStudents ?: 0}">0</div>
+                <div class="lbl">Total Students</div>
+            </div>
+            <div class="stat-item">
+                <div class="num" th:text="${totalCompanies ?: 0}">0</div>
+                <div class="lbl">Total Companies</div>
+            </div>
+            <div class="stat-item">
+                <div class="num" th:text="${activeJobs ?: 0}">0</div>
+                <div class="lbl">Active Job Postings</div>
+            </div>
+        </div>
+
+        <!-- Export Section -->
+        <div class="report-card">
+            <div class="report-card-header">
+                <i class="fa-solid fa-download text-primary"></i>
+                <span class="fw-bold text-dark fs-6">Export System Report</span>
+            </div>
+            <div class="report-card-body">
+                <p class="text-muted mb-4">Download a full snapshot of the system — users, students, companies, jobs, and application stats.</p>
+                <div class="d-flex gap-4 flex-wrap">
+                    <a th:href="@{/admin/export/csv}" class="export-btn btn-csv">
+                        <i class="fa-solid fa-file-csv fa-xl"></i>
+                        <div>
+                            <div>Download CSV</div>
+                            <div style="font-size:0.78rem; font-weight:400; opacity:0.8;">Spreadsheet format · All records</div>
+                        </div>
+                    </a>
+                    <a th:href="@{/admin/export/pdf}" class="export-btn btn-pdf">
+                        <i class="fa-solid fa-file-pdf fa-xl"></i>
+                        <div>
+                            <div>Download PDF</div>
+                            <div style="font-size:0.78rem; font-weight:400; opacity:0.8;">Formatted report · Summary view</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- API Analytics Section -->
+        <div class="report-card">
+            <div class="report-card-header">
+                <i class="fa-solid fa-chart-line text-success"></i>
+                <span class="fw-bold text-dark fs-6">Live Analytics Endpoints</span>
+            </div>
+            <div class="report-card-body">
+                <p class="text-muted mb-3">Access real-time analytics via API. Results are cached for 10 minutes for performance.</p>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded-3 border">
+                            <div class="fw-semibold text-dark mb-1"><i class="fa-solid fa-percent text-warning me-2"></i>Pass Rate</div>
+                            <div class="text-muted small mb-2">Interview pass rate across all sessions</div>
+                            <a th:href="@{/analytics/pass-rate}" class="btn btn-sm btn-outline-primary fw-semibold" target="_blank">
+                                GET /analytics/pass-rate
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded-3 border">
+                            <div class="fw-semibold text-dark mb-1"><i class="fa-solid fa-fire text-danger me-2"></i>Top Skills</div>
+                            <div class="text-muted small mb-2">Most in-demand skills across job postings</div>
+                            <a th:href="@{/analytics/top-skills}" class="btn btn-sm btn-outline-primary fw-semibold" target="_blank">
+                                GET /analytics/top-skills
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded-3 border">
+                            <div class="fw-semibold text-dark mb-1"><i class="fa-solid fa-chart-bar text-info me-2"></i>Application Trends</div>
+                            <div class="text-muted small mb-2">Monthly application volume (6 months)</div>
+                            <a th:href="@{/analytics/trends?months=6}" class="btn btn-sm btn-outline-primary fw-semibold" target="_blank">
+                                GET /analytics/trends
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded-3 border">
+                            <div class="fw-semibold text-dark mb-1"><i class="fa-solid fa-gauge text-success me-2"></i>Dashboard Summary</div>
+                            <div class="text-muted small mb-2">All key metrics in a single JSON response</div>
+                            <a th:href="@{/analytics/dashboard-summary}" class="btn btn-sm btn-outline-primary fw-semibold" target="_blank">
+                                GET /analytics/dashboard-summary
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
