@@ -1,0 +1,3 @@
+[variables]
+NIXPACKS_JDK_VERSION = '21'
+MAVEN_OPTS = '-Dmaven.test.skip=true'
