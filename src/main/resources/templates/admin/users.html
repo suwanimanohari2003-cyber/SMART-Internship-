@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Users - TalentHub Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; margin: 0; }
+        .sidebar { width: 250px; background-color: #0f172a; color: #9ca3af; position: fixed; top: 0; bottom: 0; left: 0; display: flex; flex-direction: column; z-index: 1000; }
+        .sidebar-header { padding: 20px; display: flex; align-items: center; gap: 15px; border-bottom: 1px solid #1f2937; }
+        .logo-box { background-color: #ef4444; color: white; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem; }
+        .sidebar-nav { padding: 20px 0; flex-grow: 1; }
+        .nav-item { padding: 12px 20px; display: flex; align-items: center; gap: 15px; cursor: pointer; text-decoration: none; color: #9ca3af; transition: all 0.3s ease; }
+        .nav-item:hover, .nav-item.active { background-color: #1e40af; color: white; border-right: 4px solid #ef4444; }
+        .sidebar-footer { padding: 20px; border-top: 1px solid #1f2937; }
+        .logout-btn { color: #ef4444; display: flex; align-items: center; gap: 10px; cursor: pointer; background: none; border: none; padding: 0; font-size: 1rem; }
+        .main-content { margin-left: 250px; min-height: 100vh; padding-bottom: 50px; }
+        .topbar { background-color: white; height: 70px; padding: 0 30px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e2e8f0; }
+        .page-container { padding: 40px; max-width: 1200px; margin: 0 auto; }
+        .table-card { background: white; border-radius: 12px; padding: 25px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .table th { background-color: #f8fafc; color: #64748b; font-weight: 600; font-size: 0.85rem; padding: 14px 16px; border-bottom: 2px solid #e2e8f0; }
+        .table td { padding: 14px 16px; vertical-align: middle; color: #334155; border-bottom: 1px solid #f1f5f9; }
+        .table tbody tr:last-child td { border-bottom: none; }
+        .table tbody tr:hover td { background: #f8fafc; }
+        .form-switch .form-check-input { width: 2.5em; height: 1.25em; cursor: pointer; }
+        .role-badge { padding: 3px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; }
+        .role-admin { background: #fef3c7; color: #92400e; }
+        .role-student { background: #d1fae5; color: #065f46; }
+        .role-company { background: #e0f2fe; color: #0369a1; }
+    </style>
+</head>
+<body>
+<div class="sidebar">
+    <div class="sidebar-header">
+        <div class="logo-box">AD</div>
+        <h5 class="m-0 text-white fw-bold">System Admin</h5>
+    </div>
+    <div class="sidebar-nav">
+        <a th:href="@{/admin/dashboard}" class="nav-item"><i class="fa-solid fa-gauge"></i> Dashboard</a>
+        <a th:href="@{/admin/users}" class="nav-item active"><i class="fa-solid fa-users-gear"></i> Manage Users</a>
+        <a th:href="@{/admin/students}" class="nav-item"><i class="fa-solid fa-user-graduate"></i> Manage Students</a>
+        <a th:href="@{/admin/companies}" class="nav-item"><i class="fa-solid fa-building"></i> Manage Companies</a>
+        <a th:href="@{/admin/jobs}" class="nav-item"><i class="fa-solid fa-briefcase"></i> Job Postings</a>
+        <a th:href="@{/admin/reports}" class="nav-item"><i class="fa-solid fa-chart-pie"></i> System Reports</a>
+        <a th:href="@{/admin/settings}" class="nav-item"><i class="fa-solid fa-gear"></i> Settings</a>
+        <a th:href="@{/admin/api-docs}" class="nav-item"><i class="fa-solid fa-book"></i> API Docs</a>
+    </div>
+    <div class="sidebar-footer">
+        <form th:action="@{/logout}" method="post">
+            <button type="submit" class="logout-btn"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</button>
+        </form>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="topbar">
+        <div class="fw-bold text-dark">User Management</div>
+        <div class="text-muted small" th:text="${#lists.size(users)} + ' total users'">0 users</div>
+    </div>
+    <div class="page-container">
+        <h2 class="fw-bold mb-1">All System Users</h2>
+        <p class="text-muted mb-4">Toggle accounts to enable or disable access.</p>
+
+        <div th:if="${param.msg}" class="alert alert-success fw-semibold mb-4">
+            <i class="fa-solid fa-circle-check me-2"></i> <span th:text="${param.msg[0]}">Done.</span>
+        </div>
+
+        <div class="table-card">
+            <table class="table table-hover mb-0">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Created</th>
+                    <th>Status (Toggle)</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="user : ${users}">
+                    <td class="text-muted small" th:text="${user.id}">1</td>
+                    <td class="fw-semibold" th:text="${user.username}">Username</td>
+                    <td th:text="${user.email}">email</td>
+                    <td>
+                        <span class="role-badge"
+                              th:if="${!user.roles.isEmpty()}"
+                              th:classappend="${user.roles[0].name == 'ADMIN' ? 'role-admin' :
+                                              (user.roles[0].name == 'STUDENT' ? 'role-student' : 'role-company')}"
+                              th:text="${user.roles[0].name}">Role</span>
+                    </td>
+                    <td class="text-muted small"
+                        th:text="${user.createdAt != null ? #temporals.format(user.createdAt, 'dd MMM yyyy') : 'N/A'}">Date</td>
+                    <td>
+                        <form th:action="@{'/admin/users/' + ${user.id} + '/toggle'}" method="post">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" onchange="this.form.submit()"
+                                       th:checked="${user.enabled}"
+                                       title="${user.enabled ? 'Click to disable' : 'Click to enable'}">
+                                <label class="form-check-label text-muted small"
+                                       th:text="${user.enabled ? 'Active' : 'Disabled'}">Active</label>
+                            </div>
+                        </form>
+                    </td>
+                </tr>
+                <tr th:if="${users == null or #lists.isEmpty(users)}">
+                    <td colspan="6" class="text-center text-muted py-4">No users found.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

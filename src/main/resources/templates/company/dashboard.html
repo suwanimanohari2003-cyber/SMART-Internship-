@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; margin: 0; overflow-x: hidden; }
+
+        /* Sidebar */
+        .sidebar { width: 250px; background-color: #0f172a; color: #9ca3af; position: fixed; top: 0; bottom: 0; left: 0; display: flex; flex-direction: column; z-index: 1000; }
+        .sidebar-header { padding: 20px; display: flex; align-items: center; gap: 15px; border-bottom: 1px solid #1f2937; }
+        .logo-box { background-color: #2563eb; color: white; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem; text-transform: uppercase;}
+        .sidebar-nav { padding: 20px 0; flex-grow: 1; }
+        .nav-item { padding: 12px 20px; display: flex; align-items: center; gap: 15px; cursor: pointer; text-decoration: none; color: #9ca3af; transition: all 0.3s ease; }
+        .nav-item:hover, .nav-item.active { background-color: #1e40af; color: white; border-right: 4px solid #3b82f6; }
+        .sidebar-footer { padding: 20px; border-top: 1px solid #1f2937; }
+        .logout-btn { color: #ef4444; display: flex; align-items: center; gap: 10px; text-decoration: none; cursor: pointer; background:none; border:none; padding:0; font-size: 1rem;}
+
+        /* Main Content */
+        .main-content { margin-left: 250px; min-height: 100vh; display: flex; flex-direction: column; }
+        .topbar { background-color: white; height: 70px; padding: 0 30px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e2e8f0; }
+        .search-bar { background-color: #f1f5f9; border: none; border-radius: 8px; padding: 10px 15px 10px 40px; width: 300px; outline: none;}
+        .search-container { position: relative; }
+        .search-container i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
+        .company-profile { display: flex; align-items: center; gap: 10px; }
+        .company-avatar { width: 40px; height: 40px; background-color: #1e3a8a; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; text-transform: uppercase;}
+
+        /* Dashboard Area */
+        .dashboard-container { padding: 30px; }
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .btn-post-job { background-color: #2563eb; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 500; display: flex; align-items: center; gap: 8px; text-decoration: none; }
+        .btn-post-job:hover { background-color: #1d4ed8; color: white; }
+
+        /* Stat Cards */
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; position: relative;}
+        .stat-icon { width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; margin-bottom: 15px; }
+        .stat-value { font-size: 2rem; font-weight: 700; color: #0f172a; margin-bottom: 5px; }
+        .stat-label { color: #64748b; font-size: 0.9rem; }
+        .stat-trend { font-size: 0.8rem; color: #10b981; margin-top: 10px; }
+        .trend-arrow { position: absolute; top: 20px; right: 20px; color: #10b981; font-size: 1.2rem;}
+
+        .icon-blue { background-color: #eff6ff; color: #2563eb; }
+        .icon-green { background-color: #f0fdf4; color: #16a34a; }
+        .icon-purple { background-color: #faf5ff; color: #9333ea; }
+        .icon-orange { background-color: #fff7ed; color: #ea580c; }
+
+        /* Grid Layout */
+        .content-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+        .panel-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
+        .panel-title { font-size: 1.1rem; font-weight: 600; color: #0f172a; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;}
+
+        .job-item { border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin-bottom: 15px; }
+        .job-title { font-weight: 600; color: #0f172a; margin-bottom: 5px; font-size: 0.95rem;}
+        .job-dept { font-size: 0.8rem; color: #64748b; margin-bottom: 10px; }
+        .progress-bar-custom { height: 6px; background-color: #e2e8f0; border-radius: 4px; margin-bottom: 8px; }
+        .progress-fill { height: 100%; background-color: #2563eb; border-radius: 4px; }
+        .job-meta { display: flex; justify-content: space-between; font-size: 0.75rem; color: #64748b; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-header">
+        <div class="logo-box" th:text="${companyName != null ? #strings.substring(companyName,0,1) : 'C'}">C</div>
+        <div>
+            <h5 class="m-0 text-white" style="font-size: 1.1rem; font-weight: 600;" th:text="${companyName}">Company Name</h5>
+            <span style="font-size: 0.75rem; color: #64748b;">Recruitment</span>
+        </div>
+    </div>
+
+    <div class="sidebar-nav">
+        <div style="padding: 0 20px 10px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Main Menu</div>
+        <a th:href="@{/company/dashboard}" class="nav-item active"><i class="fa-solid fa-border-all"></i> Dashboard</a>
+        <a th:href="@{/company/jobs/post}" class="nav-item"><i class="fa-solid fa-briefcase"></i> Post Job</a>
+        <a th:href="@{/company/jobs/manage}" class="nav-item"><i class="fa-solid fa-list-check"></i> Manage Jobs</a>
+        <a th:href="@{/company/applicants}" class="nav-item"><i class="fa-solid fa-users"></i> Applicants</a>
+        <a th:href="@{/company/interview-questions}" class="nav-item"><i class="fa-regular fa-comments"></i> Interview Questions</a>
+        <a th:href="@{/company/reports}" class="nav-item"><i class="fa-solid fa-chart-simple"></i> Reports</a>
+        <a th:href="@{/company/settings}" class="nav-item"><i class="fa-solid fa-gear"></i> Settings</a>
+    </div>
+
+    <div class="sidebar-footer">
+        <form th:action="@{/logout}" method="post" class="mt-3">
+            <button type="submit" class="logout-btn"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</button>
+        </form>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="topbar">
+        <form class="search-container" method="get" th:action="@{/company/applicants}">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" name="q" class="search-bar" placeholder="Search applicants...">
+        </form>
+        <div class="profile-area d-flex align-items-center gap-4">
+            <i class="fa-regular fa-bell" style="font-size: 1.2rem; color: #64748b; cursor: pointer;"></i>
+            <div class="company-profile">
+                <div class="company-avatar" th:text="${companyName != null ? #strings.substring(companyName,0,1) : 'C'}">C</div>
+                <div>
+                    <div style="font-weight: 600; font-size: 0.9rem; color: #0f172a;" th:text="${companyName}">Company Name</div>
+                    <div style="font-size: 0.75rem; color: #64748b;">Company Account</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-container">
+        <div class="page-header">
+            <div>
+                <h2 style="font-weight: 700; color: #0f172a; margin-bottom: 5px;">Company Dashboard</h2>
+                <p style="color: #64748b; margin: 0;">Welcome back, <strong th:text="${companyName}">Company Name</strong> — Here's what's happening today.</p>
+            </div>
+            <div class="d-flex gap-3 align-items-center">
+                <span class="badge bg-light text-secondary border px-3 py-2" th:text="${#temporals.format(#temporals.createNow(), 'MMM yyyy')}">Jun 2026</span>
+                <a th:href="@{/company/jobs/post}" class="btn-post-job"><i class="fa-solid fa-plus"></i> Post New Job</a>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon icon-blue"><i class="fa-solid fa-briefcase"></i></div>
+                <div class="stat-value" th:text="${activeJobs != null ? activeJobs : 0}">0</div>
+                <div class="stat-label">Active Jobs</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon icon-green"><i class="fa-solid fa-users"></i></div>
+                <div class="stat-value" th:text="${totalApplicants != null ? totalApplicants : 0}">0</div>
+                <div class="stat-label">Total Applicants</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon icon-purple"><i class="fa-regular fa-user"></i></div>
+                <div class="stat-value" th:text="${shortlisted != null ? shortlisted : 0}">0</div>
+                <div class="stat-label">Shortlisted</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon icon-orange"><i class="fa-regular fa-calendar"></i></div>
+                <div class="stat-value" th:text="${interviews != null ? interviews : 0}">0</div>
+                <div class="stat-label">Interviews Completed</div>
+            </div>
+        </div>
+
+        <div class="content-grid">
+            <div class="panel-card">
+                <div class="panel-title">
+                    <div>
+                        <div>Monthly Analytics</div>
+                        <div style="font-size: 0.8rem; color: #64748b; font-weight: normal; margin-top: 5px;">Applications received over the last 6 months</div>
+                    </div>
+                </div>
+                <div style="height: 300px;">
+                    <canvas id="applicationsChart"></canvas>
+                </div>
+            </div>
+
+            <div class="panel-card">
+                <div class="panel-title">
+                    Active Job Posts
+                    <a th:href="@{/company/jobs/manage}" style="font-size: 0.8rem; color: #2563eb; font-weight: normal; text-decoration:none;"
+                       th:text="${totalOpenJobs ?: 0} + ' open'">0 open</a>
+                </div>
+
+                <div class="job-item" th:each="job : ${activeJobPosts}">
+                    <div class="job-title" th:text="${job.title}">Job Title</div>
+                    <div class="job-dept" th:text="${job.requiredSkills}">Skills</div>
+                    <div class="progress-bar-custom">
+                        <div class="progress-fill"
+                             th:style="'width: ' + ${#numbers.formatDecimal(applicantCountByJob.get(job.id) != null and applicantCountByJob.get(job.id) > 0 ? (applicantCountByJob.get(job.id) * 100.0 / (applicantCountByJob.get(job.id) + 10)) : 5, 1, 0)} + '%'"></div>
+                    </div>
+                    <div class="job-meta">
+                        <span th:text="${(applicantCountByJob.get(job.id) ?: 0)} + ' applicants'">0 applicants</span>
+                        <span th:text="${job.deadline != null ? 'Deadline: ' + #temporals.format(job.deadline, 'MMM dd') : 'No deadline'}">Deadline</span>
+                    </div>
+                </div>
+
+                <div th:if="${#lists.isEmpty(activeJobPosts)}" class="text-center text-muted py-4">
+                    <i class="fa-solid fa-briefcase fa-2x mb-2 d-block text-secondary"></i>
+                    No active job posts yet.
+                    <div class="mt-2">
+                        <a th:href="@{/company/jobs/post}" class="btn btn-sm btn-primary">Post Your First Job</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script th:inline="javascript">
+    const trendLabels = /*[[${monthlyTrendLabels}]]*/ [];
+    const trendValues = /*[[${monthlyTrendValues}]]*/ [];
+
+    const ctx = document.getElementById('applicationsChart');
+    if (ctx) {
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: trendLabels,
+                datasets: [{
+                    label: 'Applications',
+                    data: trendValues,
+                    backgroundColor: '#2563eb',
+                    borderRadius: 6,
+                    maxBarThickness: 40
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, ticks: { precision: 0 } }
+                }
+            }
+        });
+    }
+</script>
+</body>
+</html>

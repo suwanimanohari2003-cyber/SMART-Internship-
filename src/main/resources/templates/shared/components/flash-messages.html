@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:fragment="flashMessages">
+<body>
+<div th:fragment="flashMessages">
+    <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show mb-0 rounded-0 border-0 border-bottom" role="alert" style="border-left: 4px solid #10b981 !important;">
+        <div class="container">
+            <i class="fa-solid fa-circle-check me-2 text-success"></i>
+            <span th:switch="${param.success[0]}">
+                <span th:case="'true'">Operation completed successfully.</span>
+                <span th:case="*" th:text="${param.success[0]}">Success</span>
+            </span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    </div>
+    <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show mb-0 rounded-0 border-0 border-bottom" role="alert">
+        <div class="container">
+            <i class="fa-solid fa-circle-exclamation me-2 text-danger"></i>
+            <span th:switch="${param.error[0]}">
+                <span th:case="'alreadyApplied'">You have already applied for this position.</span>
+                <span th:case="'true'">An error occurred. Please try again.</span>
+                <span th:case="*" th:text="${param.error[0]}">Error</span>
+            </span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    </div>
+    <div th:if="${param.msg}" class="alert alert-info alert-dismissible fade show mb-0 rounded-0 border-0 border-bottom" role="alert">
+        <div class="container">
+            <i class="fa-solid fa-circle-info me-2"></i>
+            <span th:text="${param.msg[0]}">Info</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    </div>
+    <script>
+        setTimeout(function() {
+            document.querySelectorAll('.alert.fade.show').forEach(function(el) {
+                el.classList.remove('show');
+                setTimeout(function() { el.remove(); }, 300);
+            });
+        }, 4000);
+    </script>
+</div>
+</body>
+</html>

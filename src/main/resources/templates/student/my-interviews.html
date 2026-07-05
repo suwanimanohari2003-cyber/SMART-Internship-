@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Mock Interviews</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; margin: 0; overflow-x: hidden; }
+        .sidebar { width: 250px; background-color: #0f172a; color: #9ca3af; position: fixed; top: 0; bottom: 0; left: 0; display: flex; flex-direction: column; z-index: 1000; }
+        .sidebar-header { padding: 20px; display: flex; align-items: center; gap: 15px; border-bottom: 1px solid #1f2937; }
+        .logo-box { background-color: #3b82f6; color: white; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem; }
+        .sidebar-nav { padding: 20px 0; flex-grow: 1; }
+        .nav-item { padding: 12px 20px; display: flex; align-items: center; gap: 15px; cursor: pointer; text-decoration: none; color: #9ca3af; transition: all 0.3s ease; }
+        .nav-item:hover, .nav-item.active { background-color: #1e40af; color: white; border-right: 4px solid #3b82f6; }
+        .sidebar-footer { padding: 20px; border-top: 1px solid #1f2937; }
+        .logout-btn { color: #ef4444; display: flex; align-items: center; gap: 10px; text-decoration: none; cursor: pointer; background:none; border:none; padding:0; font-size: 1rem;}
+        .main-content { margin-left: 250px; min-height: 100vh; padding-bottom: 50px; }
+        .topbar { background-color: white; height: 70px; padding: 0 30px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e2e8f0; }
+        .page-container { padding: 40px; max-width: 1000px; margin: 0 auto; }
+        .session-card { background: white; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 20px; transition: transform 0.2s; }
+        .session-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.07); }
+        .score-circle { width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-direction: column; flex-shrink: 0; font-weight: 800; font-size: 1.1rem; }
+        .score-pass { background: #d1fae5; color: #065f46; }
+        .score-fail { background: #fee2e2; color: #991b1b; }
+        .score-pending { background: #f1f5f9; color: #64748b; }
+    </style>
+</head>
+<body>
+<div class="sidebar">
+    <div class="sidebar-header">
+        <div class="logo-box">S</div>
+        <div>
+            <h5 class="m-0 text-white fw-bold">Student</h5>
+            <span style="font-size:0.75rem; color:#64748b;">Candidate Portal</span>
+        </div>
+    </div>
+    <div class="sidebar-nav">
+        <a th:href="@{/student/dashboard}" class="nav-item"><i class="fa-solid fa-house"></i> Dashboard & Jobs</a>
+        <a th:href="@{/student/profile}" class="nav-item"><i class="fa-regular fa-id-badge"></i> My Profile</a>
+        <a th:href="@{/student/my-cv}" class="nav-item"><i class="fa-solid fa-file-pdf"></i> My CV Preview</a>
+        <a th:href="@{/student/applications}" class="nav-item"><i class="fa-regular fa-paper-plane"></i> Applications</a>
+        <a th:href="@{/student/interviews/my}" class="nav-item active"><i class="fa-solid fa-microphone-lines"></i> Mock Interviews</a>
+    </div>
+    <div class="sidebar-footer">
+        <form th:action="@{/logout}" method="post">
+            <button type="submit" class="logout-btn"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</button>
+        </form>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="topbar">
+        <div class="fw-bold text-muted">Smart Internship Student Portal</div>
+        <div class="fw-bold text-dark" th:text="${#authentication.name}">student</div>
+    </div>
+
+    <div class="page-container">
+        <h2 class="fw-bold mb-1">My Mock Interviews</h2>
+        <p class="text-muted mb-4">Review your past interview sessions and scores.</p>
+
+        <div th:if="${sessions == null or #lists.isEmpty(sessions)}"
+             class="text-center py-5 bg-white rounded-3 border">
+            <i class="fa-solid fa-microphone-lines fa-3x text-secondary mb-3 d-block"></i>
+            <h5 class="fw-bold text-dark">No Interview Sessions Yet</h5>
+            <p class="text-muted">Once your application is shortlisted, you can start a mock interview from the Applications page.</p>
+            <a th:href="@{/student/applications}" class="btn btn-primary mt-2">View My Applications</a>
+        </div>
+
+        <div class="session-card" th:each="session : ${sessions}">
+            <div class="score-circle"
+                 th:classappend="${session.completedAt == null ? 'score-pending' : (session.passed ? 'score-pass' : 'score-fail')}">
+                <span th:if="${session.completedAt != null}" th:text="${session.totalScore != null ? session.totalScore.intValue() + '%' : '0%'}">0%</span>
+                <span th:if="${session.completedAt == null}">...</span>
+            </div>
+            <div class="flex-grow-1">
+                <div class="fw-bold text-dark" th:text="${session.jobPosting != null ? session.jobPosting.title : 'Job posting removed'}">Job Title</div>
+                <div class="text-muted small" th:text="${session.jobPosting != null and session.jobPosting.company != null ? session.jobPosting.company.name : 'N/A'}">Company</div>
+                <div class="mt-1">
+                    <span th:if="${session.completedAt != null and session.passed}"
+                          class="badge" style="background:#d1fae5; color:#065f46;">
+                        <i class="fa-solid fa-circle-check me-1"></i> Passed
+                    </span>
+                    <span th:if="${session.completedAt != null and !session.passed}"
+                          class="badge" style="background:#fee2e2; color:#991b1b;">
+                        <i class="fa-solid fa-circle-xmark me-1"></i> Failed
+                    </span>
+                    <span th:if="${session.completedAt == null}"
+                          class="badge bg-warning text-dark">
+                        <i class="fa-solid fa-clock me-1"></i> In Progress
+                    </span>
+                </div>
+            </div>
+            <div class="flex-shrink-0 text-end">
+                <div class="text-muted small mb-2"
+                     th:text="${session.startedAt != null ? #temporals.format(session.startedAt, 'dd MMM yyyy') : ''}">Date</div>
+                <a th:if="${session.completedAt != null}"
+                   th:href="@{'/student/interviews/' + ${session.id} + '/result'}"
+                   class="btn btn-sm btn-outline-primary fw-semibold">
+                    <i class="fa-solid fa-chart-bar me-1"></i> View Results
+                </a>
+                <a th:if="${session.completedAt == null}"
+                   th:href="@{'/student/interviews/' + ${session.id} + '/question/0'}"
+                   class="btn btn-sm btn-primary fw-semibold">
+                    <i class="fa-solid fa-play me-1"></i> Continue
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
