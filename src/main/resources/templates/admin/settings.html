@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; margin: 0; overflow-x: hidden; }
+        .sidebar { width: 250px; background-color: #0f172a; color: #9ca3af; position: fixed; top: 0; bottom: 0; left: 0; display: flex; flex-direction: column; z-index: 1000; }
+        .sidebar-header { padding: 20px; display: flex; align-items: center; gap: 15px; border-bottom: 1px solid #1f2937; }
+        .logo-box { background-color: #ef4444; color: white; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem; }
+        .sidebar-nav { padding: 20px 0; flex-grow: 1; }
+        .nav-item { padding: 12px 20px; display: flex; align-items: center; gap: 15px; cursor: pointer; text-decoration: none; color: #9ca3af; transition: all 0.3s ease; }
+        .nav-item:hover, .nav-item.active { background-color: #1e40af; color: white; border-right: 4px solid #ef4444; }
+        .sidebar-footer { padding: 20px; border-top: 1px solid #1f2937; }
+        .logout-btn { color: #ef4444; display: flex; align-items: center; gap: 10px; text-decoration: none; cursor: pointer; background:none; border:none; padding:0; font-size: 1rem;}
+
+        .main-content { margin-left: 250px; min-height: 100vh; padding-bottom: 50px; }
+        .topbar { background-color: white; height: 70px; padding: 0 30px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e2e8f0; }
+        .admin-profile { display: flex; align-items: center; gap: 10px; }
+        .admin-avatar { width: 40px; height: 40px; background-color: #ef4444; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+
+        .page-container { padding: 40px; max-width: 800px; margin: 0 auto; }
+        .settings-card { background: white; border-radius: 12px; padding: 30px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 20px;}
+        .form-control { border-radius: 8px; border: 1px solid #cbd5e1; padding: 10px 15px; font-size: 0.95rem; }
+    </style>
+</head>
+<body>
+<div class="sidebar">
+    <div class="sidebar-header">
+        <div class="logo-box">AD</div>
+        <div>
+            <h5 class="m-0 text-white" style="font-size: 1.1rem; font-weight: 600;">System Admin</h5>
+        </div>
+    </div>
+    <div class="sidebar-nav">
+        <div style="padding: 0 20px 10px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Admin Menu</div>
+        <a th:href="@{/admin/dashboard}" class="nav-item active"><i class="fa-solid fa-gauge"></i> Dashboard</a>
+        <a th:href="@{/admin/users}" class="nav-item"><i class="fa-solid fa-users-gear"></i> Manage Users</a>
+        <a th:href="@{/admin/students}" class="nav-item"><i class="fa-solid fa-user-graduate"></i> Manage Students</a>
+        <a th:href="@{/admin/companies}" class="nav-item"><i class="fa-solid fa-building"></i> Manage Companies</a>
+        <a th:href="@{/admin/jobs}" class="nav-item"><i class="fa-solid fa-briefcase"></i> Job Postings</a>
+        <a th:href="@{/admin/reports}" class="nav-item"><i class="fa-solid fa-chart-pie"></i> System Reports</a>
+        <a th:href="@{/admin/settings}" class="nav-item"><i class="fa-solid fa-gear"></i> Settings</a>
+        <a th:href="@{/admin/api-docs}" class="nav-item"><i class="fa-solid fa-book"></i> API Docs</a>
+    </div>
+    <div class="sidebar-footer">
+        <form th:action="@{/logout}" method="post" class="mt-3">
+            <button type="submit" class="logout-btn"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</button>
+        </form>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="topbar">
+        <div style="font-weight: 500; color: #64748b;">Intern Portal Administration</div>
+        <div class="admin-profile">
+            <div class="admin-avatar"><i class="fa-solid fa-user-shield"></i></div>
+            <div>
+                <div style="font-weight: 600; font-size: 0.9rem; color: #0f172a;" th:text="${#authentication.name}">Administrator</div>
+                <div style="font-size: 0.75rem; color: #64748b;">System Access</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="page-container">
+        <h2 class="mb-4 text-dark fw-bold">Platform Settings</h2>
+
+        <div th:if="${param.success}" class="alert alert-success fw-bold">
+            <i class="fa-solid fa-circle-check"></i> Settings updated successfully!
+        </div>
+
+        <div class="settings-card">
+            <h5 class="mb-3 text-dark fw-bold">Admin Profile</h5>
+            <form th:action="@{/admin/settings/update}" method="post">
+                <div class="mb-3">
+                    <label class="form-label text-muted fw-bold small">Full Name</label>
+                    <input type="text" name="fullName" class="form-control" value="Amandi Ewanthika" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-muted fw-bold small">Email Address</label>
+                    <input type="email" name="email" class="form-control" th:value="${#authentication.name}" required>
+                </div>
+                <button type="submit" class="btn btn-danger mt-2 px-4">Save Changes</button>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

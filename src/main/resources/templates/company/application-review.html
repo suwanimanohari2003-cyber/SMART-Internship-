@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review Application - TalentHub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; margin: 0; overflow-x: hidden; }
+        .sidebar { width: 250px; background-color: #0f172a; color: #9ca3af; position: fixed; top: 0; bottom: 0; left: 0; display: flex; flex-direction: column; z-index: 1000; }
+        .sidebar-header { padding: 20px; display: flex; align-items: center; gap: 15px; border-bottom: 1px solid #1f2937; }
+        .logo-box { background-color: #2563eb; color: white; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem; text-transform: uppercase; }
+        .sidebar-nav { padding: 20px 0; flex-grow: 1; }
+        .nav-item { padding: 12px 20px; display: flex; align-items: center; gap: 15px; cursor: pointer; text-decoration: none; color: #9ca3af; transition: all 0.3s ease; }
+        .nav-item:hover, .nav-item.active { background-color: #1e40af; color: white; border-right: 4px solid #3b82f6; }
+        .sidebar-footer { padding: 20px; border-top: 1px solid #1f2937; }
+        .logout-btn { color: #ef4444; display: flex; align-items: center; gap: 10px; cursor: pointer; background: none; border: none; padding: 0; font-size: 1rem; }
+        .main-content { margin-left: 250px; min-height: 100vh; padding-bottom: 50px; }
+        .topbar { background-color: white; height: 70px; padding: 0 30px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e2e8f0; }
+        .page-container { padding: 30px; max-width: 1000px; margin: 0 auto; }
+        .card-panel { background: white; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .card-panel-header { padding: 16px 24px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; font-weight: 700; color: #334155; display: flex; align-items: center; gap: 10px; }
+        .card-panel-body { padding: 24px; }
+        .info-row { display: flex; gap: 8px; align-items: center; color: #475569; font-size: 0.92rem; margin-bottom: 12px; }
+        .info-row strong { color: #0f172a; min-width: 130px; }
+        .skill-badge { background: #f1f5f9; color: #475569; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; margin-right: 5px; margin-bottom: 4px; display: inline-block; }
+        .status-badge { padding: 5px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; }
+        .s-pending { background: #fef9c3; color: #854d0e; }
+        .s-shortlisted { background: #dbeafe; color: #1d4ed8; }
+        .s-accepted { background: #d1fae5; color: #065f46; }
+        .s-rejected { background: #fee2e2; color: #991b1b; }
+        .audit-box { background: #f8fafc; border-radius: 8px; padding: 16px; border: 1px solid #e2e8f0; }
+    </style>
+</head>
+<body>
+<div class="sidebar">
+    <div class="sidebar-header">
+        <div class="logo-box">C</div>
+        <div>
+            <h5 class="m-0 text-white" style="font-size:1.1rem; font-weight:600;">Company</h5>
+            <span style="font-size:0.75rem; color:#64748b;">Recruitment</span>
+        </div>
+    </div>
+    <div class="sidebar-nav">
+        <a th:href="@{/company/dashboard}" class="nav-item"><i class="fa-solid fa-border-all"></i> Dashboard</a>
+        <a th:href="@{/company/jobs/post}" class="nav-item"><i class="fa-solid fa-briefcase"></i> Post Job</a>
+        <a th:href="@{/company/jobs/manage}" class="nav-item"><i class="fa-solid fa-list-check"></i> Manage Jobs</a>
+        <a th:href="@{/company/applicants}" class="nav-item active"><i class="fa-solid fa-users"></i> Applicants</a>
+        <a th:href="@{/company/interview-questions}" class="nav-item"><i class="fa-regular fa-comments"></i> Interview Questions</a>
+        <a th:href="@{/company/reports}" class="nav-item"><i class="fa-solid fa-chart-simple"></i> Reports</a>
+        <a th:href="@{/company/settings}" class="nav-item"><i class="fa-solid fa-gear"></i> Settings</a>
+    </div>
+    <div class="sidebar-footer">
+        <form th:action="@{/logout}" method="post">
+            <button type="submit" class="logout-btn"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</button>
+        </form>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="topbar">
+        <div>
+            <a th:href="@{/company/applicants}" class="text-decoration-none text-muted me-3">
+                <i class="fa-solid fa-arrow-left me-1"></i> Back to Applicants
+            </a>
+            <span class="fw-bold text-dark">Review Application</span>
+        </div>
+    </div>
+
+    <div class="page-container">
+        <div th:if="${msg}" class="alert alert-success fw-semibold mb-4">
+            <i class="fa-solid fa-circle-check me-2"></i> <span th:text="${msg}">Done.</span>
+        </div>
+
+        <div class="row g-4">
+            <!-- Student Info -->
+            <div class="col-md-6">
+                <div class="card-panel h-100">
+                    <div class="card-panel-header">
+                        <i class="fa-solid fa-user-graduate text-primary"></i> Applicant Details
+                    </div>
+                    <div class="card-panel-body">
+                        <h4 class="fw-bold mb-1" th:text="${app.student.fullName}">Student Name</h4>
+                        <div class="text-muted small mb-3" th:text="${app.student.email}">email</div>
+
+                        <div class="info-row"><strong>University:</strong> <span th:text="${app.student.university}">Uni</span></div>
+                        <div class="info-row"><strong>GPA:</strong>
+                            <span class="badge" style="background:#eff6ff; color:#1d4ed8;" th:text="${app.student.gpa}">3.5</span>
+                        </div>
+                        <div class="info-row d-block">
+                            <strong>Skills:</strong>
+                            <div class="mt-2">
+                                <span class="skill-badge"
+                                      th:each="s : ${#strings.arraySplit(app.student.skills ?: '', ',')}"
+                                      th:text="${#strings.trim(s)}">Skill</span>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 d-flex gap-2" th:if="${app.student.cvPath != null}">
+                            <a th:href="@{/company/applicants/{id}/cv(id=${applicationId})}" target="_blank" class="btn btn-outline-primary fw-semibold">
+                                <i class="fa-solid fa-eye me-2"></i> View CV
+                            </a>
+                            <a th:href="@{/company/applicants/{id}/cv(id=${applicationId}, mode='attachment')}" class="btn btn-primary fw-semibold">
+                                <i class="fa-solid fa-file-pdf me-2"></i> Download CV
+                            </a>
+                        </div>
+                        <div class="mt-3 text-muted small" th:if="${app.student.cvPath == null}">
+                            <i class="fa-solid fa-circle-exclamation me-1 text-warning"></i> No CV uploaded yet.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status Update -->
+            <div class="col-md-6">
+                <div class="card-panel h-100">
+                    <div class="card-panel-header">
+                        <i class="fa-solid fa-clipboard-check text-success"></i> Application Status
+                    </div>
+                    <div class="card-panel-body">
+                        <div class="mb-3">
+                            <div class="text-muted small fw-semibold mb-2">Current Status</div>
+                            <span class="status-badge"
+                                  th:classappend="${app.status == 'PENDING' ? 's-pending' :
+                                                  (app.status == 'SHORTLISTED' ? 's-shortlisted' :
+                                                  (app.status == 'ACCEPTED' ? 's-accepted' : 's-rejected'))}"
+                                  th:text="${app.status}">PENDING</span>
+                        </div>
+
+                        <form th:action="@{/applications/{id}/status(id=${applicationId})}" method="post" class="mt-4">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Update Decision</label>
+                                <select name="status" class="form-select">
+                                    <option value="PENDING"      th:selected="${app.status == 'PENDING'}">PENDING</option>
+                                    <option value="SHORTLISTED"  th:selected="${app.status == 'SHORTLISTED'}">SHORTLISTED</option>
+                                    <option value="ACCEPTED"     th:selected="${app.status == 'ACCEPTED'}">ACCEPTED</option>
+                                    <option value="REJECTED"     th:selected="${app.status == 'REJECTED'}">REJECTED</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary fw-bold w-100">
+                                <i class="fa-solid fa-floppy-disk me-2"></i> Save Status
+                            </button>
+                        </form>
+
+                        <hr class="my-4">
+
+                        <!-- Audit Trail -->
+                        <div class="audit-box">
+                            <div class="fw-semibold text-muted small mb-3">
+                                <i class="fa-solid fa-clock-rotate-left me-1"></i> Audit Trail
+                            </div>
+                            <div class="info-row">
+                                <strong>Applied On:</strong>
+                                <span th:if="${app.createdAt != null}"
+                                      th:text="${#temporals.format(app.createdAt, 'dd MMM yyyy HH:mm')}">Date</span>
+                                <span th:unless="${app.createdAt != null}" class="text-muted">N/A</span>
+                            </div>
+                            <div class="info-row">
+                                <strong>Last Updated:</strong>
+                                <span th:if="${app.updatedAt != null}"
+                                      th:text="${#temporals.format(app.updatedAt, 'dd MMM yyyy HH:mm')}">Date</span>
+                                <span th:unless="${app.updatedAt != null}" class="text-muted">N/A</span>
+                            </div>
+                            <div class="info-row">
+                                <strong>Changed By:</strong>
+                                <span class="fw-bold text-dark" th:text="${app.statusChangedBy ?: 'System'}">Actor</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

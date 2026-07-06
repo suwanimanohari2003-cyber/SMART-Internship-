@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post a New Job</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; margin: 0; overflow-x: hidden; }
+
+        .sidebar { width: 250px; background-color: #0f172a; color: #9ca3af; position: fixed; top: 0; bottom: 0; left: 0; display: flex; flex-direction: column; z-index: 1000; }
+        .sidebar-header { padding: 20px; display: flex; align-items: center; gap: 15px; border-bottom: 1px solid #1f2937; }
+        .logo-box { background-color: #2563eb; color: white; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem; text-transform: uppercase;}
+        .sidebar-nav { padding: 20px 0; flex-grow: 1; }
+        .nav-item { padding: 12px 20px; display: flex; align-items: center; gap: 15px; cursor: pointer; text-decoration: none; color: #9ca3af; transition: all 0.3s ease; }
+        .nav-item:hover, .nav-item.active { background-color: #1e40af; color: white; border-right: 4px solid #3b82f6; }
+        .sidebar-footer { padding: 20px; border-top: 1px solid #1f2937; }
+        .logout-btn { color: #ef4444; display: flex; align-items: center; gap: 10px; text-decoration: none; cursor: pointer; background:none; border:none; padding:0; font-size: 1rem;}
+
+        .main-content { margin-left: 250px; min-height: 100vh; padding-bottom: 50px; }
+        .topbar { background-color: white; height: 70px; padding: 0 30px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e2e8f0; }
+        .company-profile { display: flex; align-items: center; gap: 10px; }
+        .company-avatar { width: 40px; height: 40px; background-color: #1e3a8a; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; text-transform: uppercase; }
+
+        .page-container { padding: 30px; max-width: 1100px; margin: 0 auto; }
+        .form-card { background: white; border-radius: 12px; padding: 25px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; margin-bottom: 25px; }
+        .form-card-title { font-size: 1.05rem; font-weight: 600; color: #0f172a; margin-bottom: 20px; }
+        .form-label { font-weight: 500; color: #475569; font-size: 0.9rem; }
+        .form-control, .form-select { border-radius: 8px; border: 1px solid #cbd5e1; padding: 10px 15px; font-size: 0.95rem; }
+        .form-control:focus, .form-select:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+        .job-type-pill { padding: 8px 20px; border-radius: 20px; border: 1px solid #cbd5e1; color: #64748b; font-size: 0.85rem; cursor: pointer; display: inline-block; margin-right: 10px; transition: all 0.2s; }
+        .job-type-pill.active { background-color: #2563eb; color: white; border-color: #2563eb; }
+        .form-range::-webkit-slider-thumb { background: #2563eb; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-header">
+        <div class="logo-box" th:text="${companyName != null ? #strings.substring(companyName,0,1) : 'C'}">C</div>
+        <div>
+            <h5 class="m-0 text-white" style="font-size: 1.1rem; font-weight: 600;" th:text="${companyName ?: 'Company Name'}">Company Name</h5>
+            <span style="font-size: 0.75rem; color: #64748b;">Recruitment</span>
+        </div>
+    </div>
+
+    <div class="sidebar-nav">
+        <div style="padding: 0 20px 10px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Main Menu</div>
+        <a th:href="@{/company/dashboard}" class="nav-item"><i class="fa-solid fa-border-all"></i> Dashboard</a>
+        <a th:href="@{/company/jobs/post}" class="nav-item active"><i class="fa-solid fa-briefcase"></i> Post Job</a>
+        <a th:href="@{/company/jobs/manage}" class="nav-item"><i class="fa-solid fa-list-check"></i> Manage Jobs</a>
+        <a th:href="@{/company/applicants}" class="nav-item"><i class="fa-solid fa-users"></i> Applicants</a>
+        <a th:href="@{/company/interview-questions}" class="nav-item"><i class="fa-regular fa-comments"></i> Interview Questions</a>
+        <a th:href="@{/company/reports}" class="nav-item"><i class="fa-solid fa-chart-simple"></i> Reports</a>
+        <a th:href="@{/company/settings}" class="nav-item"><i class="fa-solid fa-gear"></i> Settings</a>
+    </div>
+
+    <div class="sidebar-footer">
+        <form th:action="@{/logout}" method="post" class="mt-3">
+            <button type="submit" class="logout-btn"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</button>
+        </form>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="topbar">
+        <div></div>
+        <div class="profile-area d-flex align-items-center gap-4">
+            <i class="fa-regular fa-bell" style="font-size: 1.2rem; color: #64748b; cursor: pointer;"></i>
+            <div class="company-profile">
+                <div class="company-avatar" th:text="${companyName != null ? #strings.substring(companyName,0,1) : 'C'}">C</div>
+                <div>
+                    <div style="font-weight: 600; font-size: 0.9rem; color: #0f172a;" th:text="${companyName ?: 'Company Account'}">Company Name</div>
+                    <div style="font-size: 0.75rem; color: #64748b;">Company Account</div>
+                </div>
+                <i class="fa-solid fa-chevron-down" style="font-size: 0.8rem; color: #64748b;"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="page-container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 style="font-weight: 700; color: #0f172a; margin-bottom: 5px;">Post a New Job</h2>
+                <p style="color: #64748b; margin: 0;">Fill in the details below to create a job posting for your company.</p>
+            </div>
+            <div class="d-flex gap-3">
+                <a th:href="@{/company/dashboard}" class="btn btn-light border fw-medium" style="color: #475569;">Save Draft</a>
+                <button type="submit" form="jobForm" class="btn btn-primary fw-medium" style="background-color: #2563eb; border: none;">Publish Job</button>
+            </div>
+        </div>
+
+        <div th:replace="~{shared/components/flash-messages :: flashMessages}"></div>
+
+        <form id="jobForm" th:action="@{/company/jobs/post}" th:object="${job}" method="POST">
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="form-card">
+                        <div class="form-card-title">Basic Information</div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Job Title <span class="text-danger">*</span></label>
+                            <input type="text" th:field="*{title}" class="form-control" placeholder="e.g. Senior Frontend Engineer" required>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label">Industry <span class="text-danger">*</span></label>
+                                <select name="industry" class="form-select">
+                                    <option>Technology</option>
+                                    <option>Finance</option>
+                                    <option>Healthcare</option>
+                                    <option>Education</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Location <span class="text-danger">*</span></label>
+                                <select name="location" class="form-select">
+                                    <option>Colombo, LK</option>
+                                    <option>Remote</option>
+                                    <option>New York, NY</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Job Type <span class="text-danger">*</span></label>
+
+                            <input type="hidden" id="jobTypeValue" name="jobType" value="Full-Time">
+
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-primary job-type-btn" onclick="selectJobType('Full-Time', this)">Full-Time</button>
+                                <button type="button" class="btn btn-outline-primary job-type-btn" onclick="selectJobType('Part-Time', this)">Part-Time</button>
+                                <button type="button" class="btn btn-outline-primary job-type-btn" onclick="selectJobType('Remote', this)">Remote</button>
+                            </div>
+                        </div>
+
+                        <div class="row mb-2">
+                            <div class="col-12"><label class="form-label">Salary Range</label></div>
+                            <div class="col-md-5"><input type="number" name="salaryMin" class="form-control" placeholder="120,000"></div>
+                            <div class="col-md-2 text-center" style="line-height: 40px; color: #64748b;">—</div>
+                            <div class="col-md-5 d-flex align-items-center gap-2">
+                                <input type="number" name="salaryMax" class="form-control" placeholder="160,000">
+                                <span style="color: #64748b; font-size: 0.9rem;">LKR/yr</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-card">
+                        <div class="form-card-title">Requirements & Responsibilities</div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Required Skills <span class="text-danger">*</span></label>
+                            <input type="text" th:field="*{requiredSkills}" class="form-control" placeholder="e.g. React, TypeScript, Node.js" required>
+                            <div class="mt-2" style="font-size: 0.8rem; color: #64748b;">Separate skills with commas.</div>
+                        </div>
+
+                        <div class="mb-2">
+                            <label class="form-label">Job Description <span class="text-danger">*</span></label>
+                            <textarea th:field="*{description}" class="form-control" rows="6" placeholder="Describe responsibilities..." required></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="form-card">
+                        <div class="form-card-title">Posting Details</div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Application Deadline <span class="text-danger">*</span></label>
+                            <input type="date" th:field="*{deadline}" class="form-control" required>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Minimum GPA</label>
+                            <input type="number" step="0.1" th:field="*{minGpa}" class="form-control" placeholder="e.g. 3.0" value="0.0">
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Openings</label>
+                            <input type="number" name="openings" class="form-control" value="3">
+                        </div>
+
+                        <div class="mb-2">
+                            <label class="form-label">Department</label>
+                            <input type="text" name="department" class="form-control" placeholder="e.g. Engineering">
+                        </div>
+                    </div>
+
+                    <div class="form-card">
+                        <div class="form-card-title mb-1">CV Scoring Criteria</div>
+                        <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 20px;">Weights for automated CV matching.</p>
+
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between mb-1">
+                                <label class="form-label mb-0" style="font-size: 0.85rem;">Skills Match</label>
+                                <span id="skillsVal" class="text-primary fw-bold" style="font-size: 0.85rem;">80%</span>
+                            </div>
+                            <input type="range" class="form-range" id="skillsRange" name="skillsWeight" min="0" max="100" value="80" oninput="updateSliders('skills')">
+                        </div>
+
+                        <div class="mb-2">
+                            <div class="d-flex justify-content-between mb-1">
+                                <label class="form-label mb-0" style="font-size: 0.85rem;">Experience</label>
+                                <span id="expVal" class="text-primary fw-bold" style="font-size: 0.85rem;">20%</span>
+                            </div>
+                            <input type="range" class="form-range" id="expRange" name="experienceWeight" min="0" max="100" value="20" oninput="updateSliders('exp')">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Handle Job Type selection
+    function selectJobType(type, clickedBtn) {
+        document.getElementById('jobTypeValue').value = type;
+
+        let buttons = document.querySelectorAll('.job-type-btn');
+        buttons.forEach(btn => {
+            btn.classList.remove('btn-primary');
+            btn.classList.add('btn-outline-primary');
+        });
+
+        clickedBtn.classList.remove('btn-outline-primary');
+        clickedBtn.classList.add('btn-primary');
+    }
+
+    // Handle CV Scoring Sliders logic
+    function updateSliders(changed) {
+        let skillsSlider = document.getElementById('skillsRange');
+        let expSlider = document.getElementById('expRange');
+        let skillsText = document.getElementById('skillsVal');
+        let expText = document.getElementById('expVal');
+
+        if (changed === 'skills') {
+            expSlider.value = 100 - skillsSlider.value;
+        } else if (changed === 'exp') {
+            skillsSlider.value = 100 - expSlider.value;
+        }
+
+        skillsText.innerText = skillsSlider.value + '%';
+        expText.innerText = expSlider.value + '%';
+    }
+</script>
+
+</body>
+</html>
