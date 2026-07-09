@@ -1,0 +1,61 @@
+version: '3.8'
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Smart Internship Placement Portal — Local Docker Compose
+# Usage:
+#   1. Copy .env.local to .env  (or create .env with your secrets)
+#   2. docker compose up --build
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+
+  # ── MySQL Database ──────────────────────────────────────────────────────────
+  mysql:
+    image: mysql:8.0
+    container_name: internship_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-Amandi@2004}
+      MYSQL_DATABASE: intern_portal
+      # Create a non-root app user so the app doesn't connect as root
+      MYSQL_USER: ${DB_USERNAME:-appuser}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-Amandi@2004}
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD:-Amandi@2004}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Spring Boot Application ─────────────────────────────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: internship_app
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      # Database — uses the appuser created above (NOT root from a remote host)
+      DB_URL: jdbc:mysql://mysql:3306/intern_portal?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
+      DB_USERNAME: ${DB_USERNAME:-appuser}
+      DB_PASSWORD: ${DB_PASSWORD:-Amandi@2004}
+      # Mail
+      MAIL_USERNAME: ${MAIL_USERNAME:-interngo26@gmail.com}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      # App
+      UPLOAD_DIR: /tmp/uploads/cvs
+      PORT: 8080
+    ports:
+      - "8080:8080"
+    volumes:
+      - uploads_data:/tmp/uploads/cvs
+
+volumes:
+  mysql_data:
+  uploads_data:

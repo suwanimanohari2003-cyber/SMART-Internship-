@@ -34,8 +34,14 @@ COPY --from=builder /build/target/*.jar app.jar
 EXPOSE 8080
 
 # Run the app
-ENTRYPOINT ["java", "-jar", \
+# NOTE: DB_URL, DB_USERNAME, DB_PASSWORD must be set as environment variables
+#       in your cloud platform (Railway / Cloud Run / Docker run -e flags).
+#       The hibernate.dialect is pinned here so Hibernate never tries to
+#       auto-detect it (which requires a live JDBC connection at startup).
+ENTRYPOINT ["java", \
             "-Dserver.port=${PORT:-8080}", \
             "-Dfile.upload-dir=/tmp/uploads/cvs", \
             "-Dspring.thymeleaf.cache=true", \
-            "app.jar"]
+            "-Dspring.jpa.database-platform=org.hibernate.dialect.MySQLDialect", \
+            "-Dspring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect", \
+            "-jar", "app.jar"]
